@@ -19,7 +19,7 @@ class AnyOpenAILLM(BaseLLM):
         """
         self.model_name = model_name
         self.json_mode = json_mode
-        if json_mode and self.model_name not in ['deepseek-reasoner', 'gpt-4-1106-preview']:
+        if json_mode and self.model_name not in ['deepseek-reasoner', 'deepseek-chat', 'gpt-4-1106-preview']:
             raise ValueError("json_mode is only available for gpt-3.5-turbo-1106 and gpt-4-1106-preview")
         self.max_tokens: int = kwargs.get('max_tokens', 256)
         self.max_context_length: int = 16384 if '16k' in model_name else 32768 if '32k' in model_name else 4096
