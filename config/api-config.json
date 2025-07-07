@@ -1,0 +1,7 @@
+{
+    "llm_provider": "openai",
+    "api_key":  "sk-…",                  
+    "api_base": "https://api.deepseek.com",
+    "model":    "deepseek-reasoner",    
+    "timeout":  120
+}
