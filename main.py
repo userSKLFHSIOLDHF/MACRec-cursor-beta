@@ -1,29 +1,37 @@
-import os
+import argparse
 import sys
+import os
 from loguru import logger
-from argparse import ArgumentParser
+from macrec.tasks import *
+from macrec.utils import init_openai_api, init_google_colab_secrets, read_json
+
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCkKKnTj1T0evVy6kmvZ8AciKZvyja6QKk"
 os.environ["GOOGLE_CSE_ID"] = "b555d8f9855ad4f4b"
 
-from macrec.tasks import *
-
 def main():
-    init_parser = ArgumentParser()
-    init_parser.add_argument('-m', '--main', type=str, required=True, help='The main function to run')
-    init_parser.add_argument('--verbose', type=str, default='INFO', choices=['TRACE', 'DEBUG', 'INFO', 'SUCCESS', 'WARNING', 'ERROR', 'CRITICAL'], help='The log level')
-    init_args, init_extras = init_parser.parse_known_args()
-
-    logger.remove()
-    logger.add(sys.stderr, level=init_args.verbose)
-    os.makedirs('logs', exist_ok=True)
-    # log name use the time when the program starts, level is INFO
-    logger.add('logs/{time:YYYY-MM-DD:HH:mm:ss}.log', level='DEBUG')
-
-    try:
-        task = eval(init_args.main + 'Task')()
-    except NameError:
-        logger.error('No such task!')
-        return
+    # Initialize Google Colab secrets first
+    init_google_colab_secrets()
+    
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest='task', help='Task to run')
+    
+    # Add task parsers
+    for task_class in Task.__subclasses__():
+        task_class.parse_task_args(subparsers.add_parser(task_class.__name__.lower()))
+    
+    args = parser.parse_args()
+    
+    if args.task is None:
+        parser.print_help()
+        sys.exit(1)
+    
+    # Initialize API if config is provided
+    if hasattr(args, 'api_config'):
+        init_openai_api(read_json(args.api_config))
+    
+    # Get task class and run
+    task_class = next(task_class for task_class in Task.__subclasses__() if task_class.__name__.lower() == args.task)
+    task = task_class()
     task.launch()
 
 if __name__ == '__main__':

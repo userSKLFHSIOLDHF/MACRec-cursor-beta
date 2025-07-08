@@ -1,94 +1,145 @@
 # Description: Functions for string processing.
 
-def format_step(step: str) -> str:
-    """Format a step prompt. Remove leading and trailing whitespaces and newlines, and replace newlines with spaces.
+import re
+from typing import Any, Union
 
-    Args:
-        `step` (`str`): A step prompt in string format.
-    Returns:
-        `str`: The formatted step prompt.
-    """
-    return step.strip('\n').strip().replace('\n', '')
+def format_step(step: str) -> str:
+    """Format a step string."""
+    return f'Step {step}:'
 
 def format_last_attempt(input: str, scratchpad: str, header: str) -> str:
-    """Format the last attempt reflection prompt of a trial. Remove leading and trailing whitespaces and newlines of `scratchpad`, and replace newlines with spaces. Add `header` to the beginning of the prompt.
-
-    Args:
-        `input` (`str`): The input of the last attempt.
-        `scratchpad` (`str`): The scratchpad of the last attempt.
-        `header` (`str`): The last attempt reflection header.
-    Returns:
-        `str`: The formatted last attempt prompt.
-    """
-    return header + f'Input:\n{input}\n' + scratchpad.strip('\n').strip() + '\n(END PREVIOUS TRIAL)\n'
+    """Format the last attempt."""
+    return f'{header}\n\nInput: {input}\n\nScratchpad: {scratchpad}'
 
 def format_reflections(reflections: list[str], header: str) -> str:
-    """Format reflections prompt. Remove leading and trailing whitespaces and newlines of each reflection, and replace newlines with spaces. Add `header` to the beginning of the prompt.
-
-    Args:
-        `reflections` (`list[str]`): A list of former reflections.
-        `header` (`str`): The reflections header.
-    Returns:
-        `str`: The formatted reflections prompt. If `reflections` is empty, return an empty string.
-    """
-    if reflections == []:
+    """Format reflections."""
+    if len(reflections) == 0:
         return ''
-    else:
-        return header + 'Reflections:\n- ' + '\n- '.join([r.strip() for r in reflections])
+    reflection_text = '\n\n'.join([f'Reflection {i + 1}: {reflection}' for i, reflection in enumerate(reflections)])
+    return f'{header}\n\n{reflection_text}'
 
 def format_history(history: list[dict]) -> str:
-    """Format history prompt. Add a newline between each turn in `history`.
-
-    Args:
-        `history` (`list[dict]`): A list of turns in the history. Each turn is a dictionary with keys `command` and `observation`.
-    Returns:
-        `str`: The formatted history prompt. If `history` is empty, return an empty string.
-    """
-    if history == []:
+    """Format history."""
+    if len(history) == 0:
         return ''
-    else:
-        return '\n' + '\n'.join([f"Command: {turn['command']}\nObservation: {turn['observation']}\n" for turn in history]) + '\n'
+    history_text = []
+    for i, turn in enumerate(history):
+        history_text.append(f'Step {i + 1}:')
+        if 'command' in turn:
+            history_text.append(f'Command: {turn["command"]}')
+        if 'observation' in turn:
+            history_text.append(f'Observation: {turn["observation"]}')
+        history_text.append('')
+    return '\n'.join(history_text)
 
 def format_chat_history(history: list[tuple[str, str]]) -> str:
-    """Format chat history prompt. Add a newline between each turn in `history`.
-
-    Args:
-        `history` (`list[tuple[str, str]]`): A list of turns in the chat history. Each turn is a tuple with the first element being the chat record and the second element being the role.
-    Returns:
-        `str`: The formatted chat history prompt. If `history` is empty, return `'No chat history.\\n'`.
-    """
-    if history == []:
-        return 'No chat history.\n'
-    else:
-        return '\n' + '\n'.join([f"{role.capitalize()}: {chat}" for chat, role in history]) + '\n'
+    """Format chat history."""
+    if len(history) == 0:
+        return ''
+    history_text = []
+    for role, message in history:
+        history_text.append(f'{role.capitalize()}: {message}')
+    return '\n\n'.join(history_text)
 
 def str2list(s: str) -> list[int]:
-    """Convert a string to a list of integers.
-
-    Args:
-        `s` (`str`): A string of integers separated by commas. For example, `'1,2,3'`.
-    Returns:
-        `list[int]`: A list of integers. For example, `[1, 2, 3]`.
-    """
-    return [int(i) for i in s.split(',')]
+    """Convert a string to a list of integers."""
+    if s == '':
+        return []
+    s = s.strip()
+    if s.startswith('[') and s.endswith(']'):
+        s = s[1:-1]
+    return [int(x.strip()) for x in s.split(',') if x.strip() != '']
 
 def get_avatar(agent_type: str) -> str:
-    """Get the avatar of the agent.
+    """Get the avatar for an agent type."""
+    avatar_map = {
+        'manager': '🤖',
+        'analyst': '📊',
+        'interpreter': '💬',
+        'reflector': '🤔',
+        'searcher': '🔍',
+    }
+    return avatar_map.get(agent_type.lower(), '🤖')
 
-    Args:
-        `agent_type` (`str`): The type of the agent.
-    Returns:
-        `str`: The avatar of the agent.
+def format_dict_to_text(data: Union[dict, Any], indent: int = 0) -> str:
     """
-    if 'manager' in agent_type.lower():
-        return '👩‍💼'
-    elif 'reflector' in agent_type.lower():
-        return '👩‍🔬'
-    elif 'searcher' in agent_type.lower():
-        return '🔍'
-    elif 'interpreter' in agent_type.lower():
-        return '👩‍🏫'
-    elif 'analyst' in agent_type.lower():
-        return '👩‍💻'
-    else:
-        return '🤖'
+    Convert a dictionary to user-friendly formatted text.
+    
+    Args:
+        data: The dictionary or data to format
+        indent: Current indentation level
+    
+    Returns:
+        Formatted text string
+    """
+    if not isinstance(data, dict):
+        return str(data)
+    
+    lines = []
+    indent_str = "  " * indent
+    
+    for key, value in data.items():
+        # Format the key (convert snake_case to Title Case)
+        formatted_key = key.replace('_', ' ').title()
+        
+        if isinstance(value, dict):
+            # For nested dictionaries, add a header and format recursively
+            lines.append(f"{indent_str}**{formatted_key}:**")
+            lines.append(format_dict_to_text(value, indent + 1))
+        elif isinstance(value, list):
+            # For lists, format each item
+            lines.append(f"{indent_str}**{formatted_key}:**")
+            for i, item in enumerate(value, 1):
+                if isinstance(item, dict):
+                    lines.append(f"{indent_str}  {i}. {format_dict_to_text(item, indent + 2)}")
+                else:
+                    lines.append(f"{indent_str}  {i}. {item}")
+        else:
+            # For simple values, format as key-value pair
+            lines.append(f"{indent_str}**{formatted_key}:** {value}")
+    
+    return "\n".join(lines)
+
+def format_comparison_dict(data: dict) -> str:
+    """
+    Special formatter for comparison dictionaries with similarities and differences.
+    
+    Args:
+        data: Comparison dictionary
+    
+    Returns:
+        Formatted comparison text
+    """
+    if not isinstance(data, dict) or 'comparison' not in data:
+        return format_dict_to_text(data)
+    
+    comparison = data['comparison']
+    lines = []
+    
+    for category, content in comparison.items():
+        if isinstance(content, dict):
+            # Format category header
+            category_title = category.replace('_', ' ').title()
+            lines.append(f"## {category_title}")
+            lines.append("")
+            
+            # Handle similarities and differences specially
+            similarities = content.get('similarities', '')
+            differences = content.get('differences', '')
+            
+            # Add individual items
+            for key, value in content.items():
+                if key not in ['similarities', 'differences']:
+                    item_name = key.replace('_', ' ').title()
+                    lines.append(f"**{item_name}:** {value}")
+                    lines.append("")
+            
+            # Add similarities and differences if they exist
+            if similarities:
+                lines.append("**Similarities:** " + similarities)
+                lines.append("")
+            if differences:
+                lines.append("**Differences:** " + differences)
+                lines.append("")
+    
+    return "\n".join(lines)
