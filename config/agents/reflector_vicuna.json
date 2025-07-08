@@ -1,6 +1,6 @@
 {
     "model_type": "opensource",
-    "model_path": "lmsys/vicuna-7b-v1.5-16k",
+    "model_path": "deepseek-chat",
     "do_sample": true,
     "temperature": 0.9,
     "top_p": 1.0,

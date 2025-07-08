@@ -4,7 +4,6 @@ from loguru import logger
 from typing import Any
 from transformers import pipeline
 from transformers.pipelines import Pipeline
-import streamlit as st
 
 from macrec.llms.basellm import BaseLLM
 
@@ -50,11 +49,11 @@ class MyJsonFormer:
         return json.dumps(text, ensure_ascii=False)
 
 class OpenSourceLLM(BaseLLM):
-    def __init__(self, model_path: str = 'lmsys/vicuna-7b-v1.5-16k', device: int = 0, json_mode: bool = False, prefix: str = 'react', max_new_tokens: int = 300, do_sample: bool = True, temperature: float = 0.9, top_p: float = 1.0, *args, **kwargs):
+    def __init__(self, model_path: str = 'deepseek-chat', device: int = 0, json_mode: bool = False, prefix: str = 'react', max_new_tokens: int = 300, do_sample: bool = True, temperature: float = 0.9, top_p: float = 1.0, *args, **kwargs):
         """Initialize the OpenSource LLM. The OpenSource LLM is a wrapper of the HuggingFace pipeline.
 
         Args:
-            `model_path` (`str`, optional): The path or name to the model. Defaults to `'lmsys/vicuna-7b-v1.5-16k'`.
+            `model_path` (`str`, optional): The path or name to the model. Defaults to `'deepseek-chat'`.
             `device` (`int`, optional): The device to use. Set to `auto` to automatically select the device. Defaults to `0`.
             `json_mode` (`bool`, optional): Whether to enable json mode. If enabled, the output of the LLM will be formatted into JSON by `MyJsonFormer`. Defaults to `False`.
             `prefix` (`str`, optional): The prefix of the some configuration arguments. Defaults to `'react'`.
@@ -93,7 +92,3 @@ class OpenSourceLLM(BaseLLM):
             return self.pipe.invoke(prompt)
         else:
             return self.pipe.invoke(prompt, return_full_text=False)[0]['generated_text']
-
-@st.cache_resource
-def get_opensource_llm(model_path: str = 'lmsys/vicuna-7b-v1.5-16k', device: int = 0, json_mode: bool = False, prefix: str = 'react', max_new_tokens: int = 300, do_sample: bool = True, temperature: float = 0.9, top_p: float = 1.0, **kwargs):
-    return OpenSourceLLM(model_path=model_path, device=device, json_mode=json_mode, prefix=prefix, max_new_tokens=max_new_tokens, do_sample=do_sample, temperature=temperature, top_p=top_p, **kwargs)

@@ -1,6 +1,5 @@
 import os
 import streamlit as st
-from loguru import logger
 
 from macrec.pages.task import task_config
 from macrec.systems import *
@@ -16,11 +15,6 @@ def demo():
         layout="wide",
     )
     st.sidebar.title('MACRec Demo')
-    # Log level control
-    log_level = st.sidebar.selectbox('Log Level', ['TRACE', 'DEBUG', 'INFO', 'SUCCESS', 'WARNING', 'ERROR', 'CRITICAL'], index=2)
-    logger.remove()
-    logger.add(lambda msg: st.sidebar.text(msg) if log_level in msg else None, level=log_level)  # Optional: log to sidebar
-    logger.add('logs/{time:YYYY-MM-DD:HH:mm:ss}.log', level=log_level)
     # choose a system
     system_type = st.sidebar.radio('Choose a system', SYSTEMS, format_func=lambda x: x.__name__)
     # choose the config
@@ -36,5 +30,4 @@ def demo():
     if task not in supported_tasks:
         st.error(f'The task {task2name(task)} is not supported by the system `{system_type.__name__}` with the config file `{config_file}`.')
         return
-    # System/agent caching is handled in task.py
     task_config(task=task, system_type=system_type, config_path=os.path.join(config_dir, config_file))

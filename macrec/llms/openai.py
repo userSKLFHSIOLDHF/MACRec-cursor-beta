@@ -2,7 +2,6 @@ from loguru import logger
 from langchain_openai import ChatOpenAI, OpenAI
 from langchain.schema import HumanMessage
 import unicodedata
-import streamlit as st
 
 from macrec.llms.basellm import BaseLLM
 
@@ -10,17 +9,17 @@ def sanitize_text(text):
         return unicodedata.normalize("NFKD", text).encode("utf-8", "ignore").decode("utf-8")
 
 class AnyOpenAILLM(BaseLLM):
-    def __init__(self, model_name: str = 'gpt-3.5-turbo', json_mode: bool = False, *args, **kwargs):
+    def __init__(self, model_name: str = 'deepseek-chat', json_mode: bool = False, *args, **kwargs):
         """Initialize the OpenAI LLM.
 
         Args:
-            `model_name` (`str`, optional): The name of the OpenAI model. Defaults to `gpt-3.5-turbo`.
+            `model_name` (`str`, optional): The name of the OpenAI model. Defaults to `deepseek-chat`.
             `json_mode` (`bool`, optional): Whether to use the JSON mode of the OpenAI API. Defaults to `False`.
         """
         self.model_name = model_name
         self.json_mode = json_mode
-        if json_mode and self.model_name not in ['deepseek-reasoner', 'deepseek-chat', 'gpt-4-1106-preview']:
-            raise ValueError("json_mode is only available for gpt-3.5-turbo-1106 and gpt-4-1106-preview")
+        if json_mode and self.model_name not in ['deepseek-chat', 'deepseek-reasoner', 'gpt-4-1106-preview']:
+            raise ValueError("json_mode is only available for deepseek-chat, deepseek-reasoner, and gpt-4-1106-preview")
         self.max_tokens: int = kwargs.get('max_tokens', 256)
         self.max_context_length: int = 16384 if '16k' in model_name else 32768 if '32k' in model_name else 4096
         if model_name.split('-')[0] == 'text' or model_name == 'gpt-3.5-turbo-instruct':
@@ -64,7 +63,3 @@ class AnyOpenAILLM(BaseLLM):
                     )
                 ]
             ).content.replace('\n', ' ').strip()
-
-@st.cache_resource
-def get_openai_llm(model_name: str = 'gpt-3.5-turbo', json_mode: bool = False, *args, **kwargs):
-    return AnyOpenAILLM(model_name=model_name, json_mode=json_mode, *args, **kwargs)

@@ -53,14 +53,8 @@ def check_config(config_path: str) -> bool:
     else:
         return check_json(config_path)
 
-@st.cache_resource
-def get_system_cached(system_type: type[System], config_path: str, task: str, dataset: str) -> System:
-    # This function caches system instances for efficiency
-    return system_type(config_path=config_path, task=task, leak=False, web_demo=True, dataset=dataset)
-
 def get_system(system_type: type[System], config_path: str, task: str, dataset: str) -> System:
-    # Use the cached version for web demo
-    return get_system_cached(system_type, config_path, task, dataset)
+    return system_type(config_path=config_path, task=task, leak=False, web_demo=True, dataset=dataset)
 
 def task_config(task: str, system_type: type[System], config_path: str) -> None:
     st.markdown(f'## `{system_type.__name__}` for {task2name(task)}')
