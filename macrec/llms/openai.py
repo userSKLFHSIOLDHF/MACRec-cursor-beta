@@ -23,23 +23,6 @@ class AnyOpenAILLM(BaseLLM):
             raise ValueError("json_mode is only available for gpt-3.5-turbo-1106 and gpt-4-1106-preview")
         self.max_tokens: int = kwargs.get('max_tokens', 256)
         self.max_context_length: int = 16384 if '16k' in model_name else 32768 if '32k' in model_name else 4096
-        
-        # Check if API key is provided in kwargs, otherwise use environment variable
-        if 'openai_api_key' not in kwargs and 'api_key' not in kwargs:
-            import os
-            api_key = os.environ.get('OPENAI_API_KEY')
-            if api_key:
-                kwargs['openai_api_key'] = api_key
-                logger.info('Using API key from environment variable.')
-        
-        # Check if API base is provided in kwargs, otherwise use environment variable
-        if 'openai_api_base' not in kwargs and 'api_base' not in kwargs:
-            import os
-            api_base = os.environ.get('OPENAI_API_BASE')
-            if api_base:
-                kwargs['openai_api_base'] = api_base
-                logger.info('Using API base from environment variable.')
-        
         if model_name.split('-')[0] == 'text' or model_name == 'gpt-3.5-turbo-instruct':
             self.model = OpenAI(model_name=model_name, *args, **kwargs)
             self.model_type = 'completion'

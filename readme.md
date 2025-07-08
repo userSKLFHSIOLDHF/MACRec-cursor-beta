@@ -72,36 +72,6 @@
    bash ./scripts/preprocess.sh
    ```
 
-### Google Colab Secrets Setup (Optional)
-
-If you're running MACRec in Google Colab and want to use Google Colab's secret management system for API keys, follow these steps:
-
-1. **Set up your API keys in Google Colab secrets:**
-   ```python
-   from google.colab import userdata
-   
-   # Set your DeepSeek API key
-   userdata.set('DEEPSEEK_API_KEY', 'your-deepseek-api-key-here')
-   
-   # Set your Google API key
-   userdata.set('GOOGLE_API_KEY', 'your-google-api-key-here')
-   
-   # Set your Google Custom Search Engine ID
-   userdata.set('GOOGLE_CSE_ID', 'your-google-cse-id-here')
-   ```
-
-2. **Verify your setup:**
-   ```python
-   !python setup_colab_secrets.py
-   ```
-
-3. **Run MACRec normally** - the program will automatically detect and use your Google Colab secrets.
-
-**Note:** 
-- You only need to set these secrets once per Colab session
-- If secrets are not set, the program will fall back to using config files or environment variables
-- For local development, you can still use the traditional config files or environment variables
-
 ### Run with the command line
 
 Use the following to run specific tasks:

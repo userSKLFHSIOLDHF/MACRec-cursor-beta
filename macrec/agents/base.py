@@ -131,27 +131,9 @@ class ToolAgent(Agent):
             config_path = tool['config_path']
             if self.dataset is not None:
                 config_path = config_path.format(dataset=self.dataset)
-            
-            if tool_type == "google":
-                # For Google tools, try to use environment variables first
-                import os
-                google_api_key = os.environ.get('GOOGLE_API_KEY')
-                google_cse_id = os.environ.get('GOOGLE_CSE_ID')
-                
-                if google_api_key and google_cse_id:
-                    # Use environment variables
-                    config_args = {
-                        'k': 5,  # Default value
-                        'google_api_key': google_api_key,
-                        'google_cse_id': google_cse_id
-                    }
-                    logger.info('Using Google API credentials from environment variables.')
-                else:
-                    # Fall back to config file
-                    with open(config_path, "r", encoding='utf-8') as f:
-                        config_args = json.load(f)
-                    logger.info('Using Google API credentials from config file.')
-                
+            with open(config_path, "r", encoding='utf-8') as f:
+                config_args = json.load(f)
+            if tool_type=="google":
                 self.tools[tool_name] = TOOL_MAP[tool_type](**config_args)
             else:
                 self.tools[tool_name] = TOOL_MAP[tool_type](config_path=config_path)
