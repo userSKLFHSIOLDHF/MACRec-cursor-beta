@@ -4,6 +4,7 @@ import os
 from loguru import logger
 from macrec.tasks import *
 from macrec.utils import init_openai_api, init_google_colab_secrets, read_json
+from macrec.tasks.base import Task
 
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCkKKnTj1T0evVy6kmvZ8AciKZvyja6QKk"
 os.environ["GOOGLE_CSE_ID"] = "b555d8f9855ad4f4b"
