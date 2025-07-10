@@ -106,7 +106,7 @@ Then open the browser and visit `http://localhost:8501/` to use the web demo.
 Please note that the systems utilizing open-source LLMs or other language models may require a significant amount of memory. These systems have been disabled on machines without CUDA support.
 
 ### Citation
-If you find our work useful, please do not save your star and cite our work:
+If you find the work useful, please do not save your star and cite the work:
 ```
 @inproceedings{wang2024macrec,
   title={MACRec: A Multi-Agent Collaboration Framework for Recommendation},
