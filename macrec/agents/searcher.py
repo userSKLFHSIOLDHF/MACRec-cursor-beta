@@ -6,6 +6,8 @@ from langchain_google_community import GoogleSearchAPIWrapper
 from macrec.agents.base import ToolAgent
 from macrec.tools import Wikipedia
 from macrec.utils import read_json, parse_action, get_rm
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 class Searcher(ToolAgent):
     def __init__(self, config_path: str, *args, **kwargs) -> None:
@@ -73,7 +75,15 @@ class Searcher(ToolAgent):
         log_head = ''
         action_type, argument = parse_action(command, json_mode=self.json_mode)
         if action_type.lower() == 'search':
-            observation = self.retriever.search(query=argument)
+            # Run Wikipedia and Google search in parallel
+            with ThreadPoolExecutor() as executor:
+                wiki_future = executor.submit(self.retriever.search, argument)
+                google_future = executor.submit(self.google_retriever.run, argument)
+                
+                wiki_result = wiki_future.result()
+                google_result = google_future.result()
+                
+                observation = f"Wikipedia: {wiki_result}\nGoogle: {google_result}"
             log_head = f':violet[Search for] :red[{argument}]:violet[...]\n- '
         elif action_type.lower() == 'googlesearch':
             observation = self.google_retriever.run(argument)

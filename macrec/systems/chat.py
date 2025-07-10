@@ -83,7 +83,7 @@ class ChatSystem(System):
         action_type, argument = self.act()
         self.execute(action_type, argument)
         self.step_n += 1
-
+    
     def forward(self, user_input: str, reset: bool = True) -> str:
         if reset:
             self.reset()
