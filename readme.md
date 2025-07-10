@@ -1,3 +1,9 @@
+This project is revised based on the official implementation of the following SIGIR 2024 demo paper:
+
+- Wang, Zhefan, Yuanqing Yu, et al. "MACRec: A Multi-Agent Collaboration Framework for Recommendation". SIGIR 2024.
+
+This revision is made by James Zheng.
+
 ## MACRec: a Multi-Agent Collaboration Framework for Recommendation
 
 
