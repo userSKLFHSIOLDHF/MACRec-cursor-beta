@@ -92,3 +92,21 @@ def get_avatar(agent_type: str) -> str:
         return '👩‍💻'
     else:
         return '🤖'
+
+def dict_to_markdown(data, indent=0):
+    """Recursively format a dictionary or list into a Markdown string."""
+    md = ''
+    prefix = '  ' * indent
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if isinstance(value, (dict, list)):
+                md += f'{prefix}**{key.replace("_", " ").capitalize()}:**\n'
+                md += dict_to_markdown(value, indent + 1)
+            else:
+                md += f'{prefix}- **{key.replace("_", " ").capitalize()}:** {value}\n'
+    elif isinstance(data, list):
+        for item in data:
+            md += f'{prefix}- {dict_to_markdown(item, indent + 1)}'
+    else:
+        md += f'{prefix}{data}\n'
+    return md

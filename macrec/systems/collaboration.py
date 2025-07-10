@@ -5,6 +5,7 @@ from loguru import logger
 from macrec.systems.base import System
 from macrec.agents import Agent, Manager, Analyst, Interpreter, Reflector, Searcher
 from macrec.utils import parse_answer, parse_action, format_chat_history
+from macrec.utils.string import dict_to_markdown
 
 class CollaborationSystem(System):
     @staticmethod
@@ -202,11 +203,9 @@ class CollaborationSystem(System):
         while not self.is_finished() and not self.is_halted():
             self.step()
         if self.task == 'chat':
-            # Convert dictionary answer to formatted string if needed
+            # Convert dictionary answer to user-friendly Markdown if needed
             if isinstance(self.answer, dict):
-                import json
-                formatted_answer = json.dumps(self.answer, indent=2)
-                self.answer = f"```json\n{formatted_answer}\n```"
+                self.answer = dict_to_markdown(self.answer)
             self.add_chat_history(self.answer, role='system')
         return self.answer
 

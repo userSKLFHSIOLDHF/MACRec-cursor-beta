@@ -4,6 +4,7 @@ from loguru import logger
 from macrec.systems.base import System
 from macrec.agents import Manager, Searcher, Interpreter
 from macrec.utils import format_chat_history, parse_action
+from macrec.utils.string import dict_to_markdown
 
 class ChatSystem(System):
     @staticmethod
@@ -88,17 +89,15 @@ class ChatSystem(System):
         if reset:
             self.reset()
         self.add_chat_history(user_input, role='user')
-        self.task_prompt = self.interpreter(input=self.chat_history)
+        self.task_prompt = self.interpreter(input=format_chat_history(self.chat_history))
         while not self.is_finished() and not self.is_halted():
             self.step()
         if not self.is_finished():
             self.answer = "I'm sorry, I cannot continue the conversation. Please try again."
         
-        # Convert dictionary answer to formatted string if needed
+        # Convert dictionary answer to user-friendly Markdown if needed
         if isinstance(self.answer, dict):
-            import json
-            formatted_answer = json.dumps(self.answer, indent=2)
-            self.answer = f"```json\n{formatted_answer}\n```"
+            self.answer = dict_to_markdown(self.answer)
         
         self.add_chat_history(self.answer, role='system')
         return self.answer

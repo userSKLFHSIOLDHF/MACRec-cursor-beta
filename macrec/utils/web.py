@@ -1,6 +1,7 @@
 import streamlit as st
 from typing import Optional
 import json
+from macrec.utils.string import dict_to_markdown
 
 def add_chat_message(role: str, message: str | dict, avatar: Optional[str] = None):
     """Add a chat message to the chat history.
@@ -13,10 +14,9 @@ def add_chat_message(role: str, message: str | dict, avatar: Optional[str] = Non
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
     
-    # Handle dictionary messages by converting to formatted string
+    # Handle dictionary messages by converting to user-friendly Markdown
     if isinstance(message, dict):
-        formatted_message = json.dumps(message, indent=2)
-        display_message = f"```json\n{formatted_message}\n```"
+        display_message = dict_to_markdown(message)
     else:
         display_message = str(message)
     
