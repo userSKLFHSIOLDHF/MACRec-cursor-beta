@@ -1,5 +1,6 @@
 import streamlit as st
 from loguru import logger
+import json
 
 from macrec.systems import ChatSystem, CollaborationSystem
 from macrec.utils import add_chat_message
@@ -12,8 +13,13 @@ def chat_page(system: ChatSystem | CollaborationSystem) -> None:
             with st.chat_message(chat['role']):
                 for message in chat['message']:
                     st.markdown(f'{message}')
+        elif isinstance(chat['message'], dict):
+            # Handle dictionary responses by converting to formatted string
+            formatted_message = json.dumps(chat['message'], indent=2)
+            st.chat_message(chat['role']).markdown(f"```json\n{formatted_message}\n```")
         else:
-            raise ValueError
+            # Convert any other type to string
+            st.chat_message(chat['role']).markdown(str(chat['message']))
     logger.debug('Initialization complete!')
     if prompt := st.chat_input():
         add_chat_message('user', prompt)

@@ -84,7 +84,7 @@ class CollaborationSystem(System):
     @property
     def chat_history(self) -> list[tuple[str, str]]:
         assert self.task == 'chat', 'Chat history is only available for chat task.'
-        return format_chat_history(self._chat_history)
+        return self._chat_history
 
     def is_halted(self) -> bool:
         return ((self.step_n > self.max_step) or self.manager.over_limit(scratchpad=self.scratchpad, **self.manager_kwargs)) and not self.finished
@@ -181,14 +181,14 @@ class CollaborationSystem(System):
     def interprete(self) -> None:
         if self.task == 'chat':
             assert self.interpreter is not None, 'Interpreter is required for chat task.'
-            self.manager_kwargs['task_prompt'] = self.interpreter(input=self.chat_history)
+            self.manager_kwargs['task_prompt'] = self.interpreter(input=format_chat_history(self.chat_history))
         else:
             if self.interpreter is not None:
                 self.manager_kwargs['task_prompt'] = self.interpreter(input=self.input)
 
     def forward(self, user_input: Optional[str] = None, reset: bool = True) -> Any:
         if self.task == 'chat':
-            self.manager_kwargs['history'] = self.chat_history
+            self.manager_kwargs['history'] = format_chat_history(self.chat_history)
         else:
             self.manager_kwargs['input'] = self.input
         if self.reflect():
@@ -202,6 +202,11 @@ class CollaborationSystem(System):
         while not self.is_finished() and not self.is_halted():
             self.step()
         if self.task == 'chat':
+            # Convert dictionary answer to formatted string if needed
+            if isinstance(self.answer, dict):
+                import json
+                formatted_answer = json.dumps(self.answer, indent=2)
+                self.answer = f"```json\n{formatted_answer}\n```"
             self.add_chat_history(self.answer, role='system')
         return self.answer
 

@@ -1,21 +1,30 @@
 import streamlit as st
 from typing import Optional
+import json
 
-def add_chat_message(role: str, message: str, avatar: Optional[str] = None):
+def add_chat_message(role: str, message: str | dict, avatar: Optional[str] = None):
     """Add a chat message to the chat history.
 
     Args:
         `role` (`str`): The role of the message.
-        `message` (`str`): The message to be added.
+        `message` (`str` | `dict`): The message to be added.
         `avatar` (`Optional[str]`): The avatar of the agent. If `avatar` is `None`, use the default avatar.
     """
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
+    
+    # Handle dictionary messages by converting to formatted string
+    if isinstance(message, dict):
+        formatted_message = json.dumps(message, indent=2)
+        display_message = f"```json\n{formatted_message}\n```"
+    else:
+        display_message = str(message)
+    
     st.session_state.chat_history.append({'role': role, 'message': message})
     if avatar is not None:
-        st.chat_message(role, avatar=avatar).markdown(message)
+        st.chat_message(role, avatar=avatar).markdown(display_message)
     else:
-        st.chat_message(role).markdown(message)
+        st.chat_message(role).markdown(display_message)
 
 def get_color(agent_type: str) -> str:
     """Get the color of the agent.

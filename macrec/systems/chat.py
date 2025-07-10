@@ -20,7 +20,7 @@ class ChatSystem(System):
         }
 
     def is_halted(self) -> bool:
-        return ((self.step_n > self.max_step) or self.manager.over_limit(history=self.chat_history, task_prompt=self.task_prompt, scratchpad=self.scratchpad, **self.manager_kwargs)) and not self.finished
+        return ((self.step_n > self.max_step) or self.manager.over_limit(history=format_chat_history(self.chat_history), task_prompt=self.task_prompt, scratchpad=self.scratchpad, **self.manager_kwargs)) and not self.finished
 
     def reset(self, clear: bool = False, *args, **kwargs) -> None:
         super().reset(*args, **kwargs)
@@ -39,13 +39,13 @@ class ChatSystem(System):
 
     @property
     def chat_history(self) -> list[tuple[str, str]]:
-        return format_chat_history(self._chat_history)
+        return self._chat_history
 
     def think(self):
         # Think
         logger.debug(f'Step {self.step_n}:')
         self.scratchpad += f'\nThought {self.step_n}:'
-        thought = self.manager(history=self.chat_history, task_prompt=self.task_prompt, scratchpad=self.scratchpad, stage='thought', **self.manager_kwargs)
+        thought = self.manager(history=format_chat_history(self.chat_history), task_prompt=self.task_prompt, scratchpad=self.scratchpad, stage='thought', **self.manager_kwargs)
         self.scratchpad += ' ' + thought
         self.log(f'**Thought {self.step_n}**: {thought}', agent=self.manager)
 
@@ -55,7 +55,7 @@ class ChatSystem(System):
         if self.step_n == self.max_step:
             self.scratchpad += f'\nHint: {self.manager.hint}'
         self.scratchpad += f'\nAction {self.step_n}:'
-        action = self.manager(history=self.chat_history, task_prompt=self.task_prompt, scratchpad=self.scratchpad, stage='action', **self.manager_kwargs)
+        action = self.manager(history=format_chat_history(self.chat_history), task_prompt=self.task_prompt, scratchpad=self.scratchpad, stage='action', **self.manager_kwargs)
         self.scratchpad += ' ' + action
         action_type, argument = parse_action(action, json_mode=self.manager.json_mode)
         logger.debug(f'Action {self.step_n}: {action}')
@@ -83,7 +83,7 @@ class ChatSystem(System):
         action_type, argument = self.act()
         self.execute(action_type, argument)
         self.step_n += 1
-    
+
     def forward(self, user_input: str, reset: bool = True) -> str:
         if reset:
             self.reset()
@@ -93,6 +93,13 @@ class ChatSystem(System):
             self.step()
         if not self.is_finished():
             self.answer = "I'm sorry, I cannot continue the conversation. Please try again."
+        
+        # Convert dictionary answer to formatted string if needed
+        if isinstance(self.answer, dict):
+            import json
+            formatted_answer = json.dumps(self.answer, indent=2)
+            self.answer = f"```json\n{formatted_answer}\n```"
+        
         self.add_chat_history(self.answer, role='system')
         return self.answer
 
