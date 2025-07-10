@@ -2,8 +2,8 @@ import os
 import sys
 from loguru import logger
 from argparse import ArgumentParser
-os.environ["GOOGLE_API_KEY"] = ""
-os.environ["GOOGLE_CSE_ID"] = ""
+os.environ["GOOGLE_API_KEY"] = "GOOGLE_API_KEY"
+os.environ["GOOGLE_CSE_ID"] = "GOOGLE_CSE_ID"
 
 from macrec.tasks import *
 
